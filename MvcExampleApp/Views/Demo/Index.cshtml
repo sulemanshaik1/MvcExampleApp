@@ -1,0 +1,210 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+</head>
+<body>
+    <div>
+        <nav class="navbar navbar-expand-sm bg-light justify-content-center">
+            <ul class="navbar-static-top">
+                <li class="nav-item">
+                    <a class="nav-link" id="ancrEmp" href="#">Employee Details</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="ancrDept" href="#">Department Details</a>
+                </li>
+            </ul>
+        </nav>
+        <br>
+
+        <div class="col-md-12" id="divEmployee">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Please enter the Employee details below.</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group col-md-5">
+                        <label>Employee Name</label>
+                        <input type="text" name="empName" id="empName" class="form-control" placeholder="Enter Employee Name" required="" />
+                    </div>
+                    <div class="form-group col-md-5">
+                        <label>Employee Location</label>
+                        <input type="text" name="empLocation" id="empLocation" class="form-control" placeholder="Enter Employee Location" required="" />
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <div style="float: right; display:inline-block;">
+                            <input class="btn btn-primary" name="submitButton" id="btnEmpSave" value="Save" type="button">
+                        </div>
+                    </div>
+                </div>
+            </div><hr />
+            <table id="tblEmployee" class="table table-bordered table-striped table-responsive table-hover">
+                <thead>
+                    <tr>
+                        <th align="left" class="productth">Student Name</th>
+                        <th align="left" class="productth">Student Address</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyEmp"></tbody>
+            </table>
+        </div>
+
+        <div class="col-md-12" id="divDepartment">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Please enter the Department details below.</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group col-md-5">
+                        <label>Department Name</label>
+                        <input type="text" name="deptName" id="deptName" class="form-control" placeholder="Enter Department Name" required="" />
+                    </div>
+                    <div class="form-group col-md-5">
+                        <label>Department Location</label>
+                        <input type="text" name="deptLocation" id="deptLocation" class="form-control" placeholder="Enter Department Location" required="" />
+                    </div>
+
+                    <div class="form-group col-md-1">
+                        <div style="float: right; display:inline-block;">
+                            <input class="btn btn-primary" name="submitButton" id="btnDeptSave" value="Save" type="button">
+                        </div>
+                    </div>
+                </div>
+            </div><hr />
+            @*<table id="tblEmployee" class="table table-bordered table-striped table-responsive table-hover">
+                <thead>
+                    <tr>
+                        <th align="left" class="productth">Departme Name</th>
+                        <th align="left" class="productth">Student Address</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>*@
+        </div>
+        <script>
+            //on page load hide all divs
+            $(document).ready(function () {
+               
+                $("#divEmployee").hide();
+                 $("#divDepartment").hide();
+            });
+
+            //onclick on the employee hyper link displaying emp details
+            $('#ancrEmp').on('click', function () {
+                 $("#divDepartment").hide();
+                $("#divEmployee").show();
+                loadData();
+                
+            });
+            //onclick on the department hyper displaying department details
+             $('#ancrDept').on('click', function () {
+                  $("#divEmployee").hide();
+                 $("#divDepartment").show();
+             });
+
+            $('#btnEmpSave').on('click', function () {
+                if (validate() === true) {
+                     Add();
+                     clearTextBoxes();
+                }
+              
+            });
+
+              function Add() {
+                    var empObj = {
+                        Name: $('#empName').val(),
+                        Location: $('#empLocation').val(),
+                    };
+                    $.ajax({
+                        url: "/Demo/AddEmployee",
+                        data: JSON.stringify(empObj),
+                        type: "POST",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        success: function (result) {
+                            loadData();
+                            //   $('#myModal').modal('hide');
+                        },
+                        error: function (errormessage) {
+                            alert(errormessage.responseText);
+                        }
+                    });
+                }
+
+
+            //Load Data function  
+            function loadData() {
+                $.ajax({
+                    url: "/Demo/GetEmployeeDetails",
+                    type: "GET",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        var html = '';
+                        if (result.length===0) {
+                            html += '<tr >';
+                            html += '<td colspan="2">No data found...</td>';
+                            html += '</tr>';
+                        }
+                        else {
+                            $.each(result, function (key, item) {
+                            html += '<tr>';
+                            html += '<td>' + item.Name + '</td>';
+                            html += '<td>' + item.Location + '</td>';
+                            html += '</tr>';
+                        });
+                        }
+                        
+                        $('#tbodyEmp').html(html);
+                        console.log(html);
+                    },
+                    error: function (errormessage) {
+                        alert(errormessage.responseText);
+                    }
+                });
+            }
+
+            function clearTextBoxes() {
+                 $('#empName').val("");  
+                 $('#empLocation').val("");  
+                 $('#deptName').val("");  
+                 $('#deptLocation').val("");  
+            }
+
+            function validate() {
+                var isValid = true; 
+                if ($('#empName').val().trim()=="") {
+                    $('#empName').css('border-color', 'Red');
+                    $('#empLocation').css('border-color', '');
+                    isValid = false;
+                    return isValid;
+                }
+                else if($('#empLocation').val().trim()=="") {
+                    $('#empLocation').css('border-color', 'Red');
+                     $('#empName').css('border-color', '');
+                    isValid = false;
+                    return isValid;
+                }
+                else {
+                    $('#empName').css('border-color', '');
+                    $('#empLocation').css('border-color', '');
+                    return isValid=true;
+                }
+
+
+            }
+
+
+        </script>
+    </div>
+</body>
+</html>

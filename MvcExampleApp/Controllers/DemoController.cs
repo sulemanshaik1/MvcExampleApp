@@ -15,19 +15,29 @@ namespace MvcExampleApp.Controllers
         }
 
         [HttpPost]
-        public bool AddEmployee(EmployeeModel emp)
+        public JsonResult AddEmployee(EmployeeModel emp)
         {
-            XDocument xmlDoc = XDocument.Load(Server.MapPath("~/XML/Employee.xml"));
-            xmlDoc.Element("Employees").Add(new XElement("Employee", new XElement("Name", emp.Name), new XElement("Location", emp.Location)));
-            xmlDoc.Save(Server.MapPath("~/XML/Employee.xml"));
-            return true;
+            return Json(Add(emp), JsonRequestBehavior.AllowGet);
         }
-
-        //[HttpGet]
         public ActionResult GetEmployeeDetails()
         {
             var empdetails = GetEmployees();
             return Json(empdetails, JsonRequestBehavior.AllowGet);
+        }
+
+        public int Add(EmployeeModel emp)
+        {
+            if (!string.IsNullOrEmpty(emp.ToString()))
+            {
+                XDocument xmlDoc = XDocument.Load(Server.MapPath("~/XML/Employee.xml"));
+                xmlDoc.Element("Employees").Add(new XElement("Employee", new XElement("Name", emp.Name), new XElement("Location", emp.Location)));
+                xmlDoc.Save(Server.MapPath("~/XML/Employee.xml"));
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public List<EmployeeModel> GetEmployees()
