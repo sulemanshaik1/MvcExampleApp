@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Departments>
+  <Department>
+    <Name>DeptName</Name>
+    <Details>Dept Details</Details>
+  </Department>
+</Departments>
